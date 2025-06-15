@@ -3,4 +3,36 @@
 **Version: 8.1
 
 #Этапы:
-1) Скачал ISO-образ с официального сайта
+1) Скачал ISO-образ с официального сайта: https://proxmox.com/en/downloads
+2) Создал загрузочную флешкучерез rufus
+3) Схема сети: Домашний интернет, роутер tplink дает по dhcp ip адрес на роутер Xiomi. Xiomi локальная сеть: 192.168.31.1/24
+PROXMOX - 192.168.31.200 - static
+local notebook - 192.168.31.106 - static
+4) Диск: ssd 240GB, ext4
+IP: 192.168.31.200
+Шлюз: 192.168.31.1
+Hostname: pvehome.local
+
+#Проблемы и решение
+  Отсутствие доступа к веб-интерфейсу
+Файл /etc/default/pveproxy - пустой
+
+Прописал:
+# Default settings for pveproxy
+PVEPROXY_LISTEN_IP="0.0.0.0"
+PVEPROXY_PORT=8006
+PVEPROXY_CERT="/etc/pve/local/pveproxy-ssl.pem"
+PVEPROXY_KEY="/etc/pve/local/pveproxy-ssl.key"
+
+Создал SSL-сертификат
+pvecm updatecerts --force
+
+Перезапустил сервисы, проверил статус
+systemctl restart pveproxy pvedaemon
+systemctl status pveproxy
+
+Затем перезагрузил PROXMOX
+reboot
+
+Доступ к веб-интерфейсу появился.
+
