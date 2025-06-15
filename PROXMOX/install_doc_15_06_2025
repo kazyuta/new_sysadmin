@@ -1,38 +1,45 @@
-#Установка Proxmox VE
-**Date: 15.06.2025
-**Version: 8.1
+# Установка Proxmox VE  
+Дата: 15.06.2025  
+Версия: 8.1  
 
-#Этапы:
-1) Скачал ISO-образ с официального сайта: https://proxmox.com/en/downloads
-2) Создал загрузочную флешкучерез rufus
-3) Схема сети: Домашний интернет, роутер tplink дает по dhcp ip адрес на роутер Xiomi. Xiomi локальная сеть: 192.168.31.1/24
-PROXMOX - 192.168.31.200 - static
-local notebook - 192.168.31.106 - static
-4) Диск: ssd 240GB, ext4
-IP: 192.168.31.200
-Шлюз: 192.168.31.1
-Hostname: pvehome.local
+## Схема сети  
+- Роутер 1: TP-Link (DHCP) → Роутер 2: Xiaomi (LAN: 192.168.31.1/24)  
+- Устройства:  
+  - Proxmox: 192.168.31.200 (статический)  
+  - Ноутбук: 192.168.31.106 (статический)  
 
-#Проблемы и решение
-  Отсутствие доступа к веб-интерфейсу
-Файл /etc/default/pveproxy - пустой
+## Этапы установки  
+1. Загрузка ISO: [Официальный сайт](https://proxmox.com/en/downloads)  
+2. Создание загрузочной флешки:  
+   - Инструмент: Rufus (режим: DD)  
+3. Настройки:  
+   - Диск: SSD 240 ГБ, ext4 
+   - Сеть:  
+     IP = 192.168.31.200/24  
+     Шлюз = 192.168.31.1  
+     Hostname = pvehome.local  
+     
+ 
 
-Прописал:
-# Default settings for pveproxy
-PVEPROXY_LISTEN_IP="0.0.0.0"
-PVEPROXY_PORT=8006
-PVEPROXY_CERT="/etc/pve/local/pveproxy-ssl.pem"
-PVEPROXY_KEY="/etc/pve/local/pveproxy-ssl.key"
+## Проблемы и решения  
+### 1. Отсутствие доступа к веб-интерфейсу  
+Причина:  
+- Пустой файл /etc/default/pveproxy  
 
-Создал SSL-сертификат
-pvecm updatecerts --force
+Решение:  
+`bash  
+# Создание конфига   
+PVEPROXY_LISTEN_IP="0.0.0.0"  
+PVEPROXY_PORT=8006  
+PVEPROXY_CERT="/etc/pve/local/pveproxy-ssl.pem"  
+PVEPROXY_KEY="/etc/pve/local/pveproxy-ssl.key"   
 
-Перезапустил сервисы, проверил статус
-systemctl restart pveproxy pvedaemon
-systemctl status pveproxy
+# Пересоздание сертификатов  
+pvecm updatecerts --force  
 
-Затем перезагрузил PROXMOX
+# Перезапуск служб  
+systemctl restart pveproxy pvedaemon  
+systemctl status pveproxy  
+
+# Фикс подействовал только после:  
 reboot
-
-Доступ к веб-интерфейсу появился.
-
